@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spanish MCQ — Learn & Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a23;
+    --card: #1e2330;
+    --border: #2a3045;
+    --gold: #f5c842;
+    --gold-dim: #c9a02e;
+    --green: #4ade80;
+    --green-bg: #052010;
+    --red: #f87171;
+    --red-bg: #200505;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --accent: #6c8fff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Sora',sans-serif; min-height:100vh; }
+
+  /* ── TOP NAV ── */
+  header {
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100;
+  }
+  .logo { font-size:1.3rem; font-weight:800; color:var(--gold); letter-spacing:-0.5px; }
+  .logo span { color:var(--text); }
+  .mode-tabs { display:flex; gap:8px; }
+  .mode-tab {
+    padding:8px 20px; border-radius:999px; border:1.5px solid var(--border);
+    background:transparent; color:var(--muted); font-family:'Sora',sans-serif;
+    font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s;
+  }
+  .mode-tab.active { background:var(--gold); color:#000; border-color:var(--gold); }
+  .mode-tab:hover:not(.active) { border-color:var(--gold); color:var(--gold); }
+
+  /* ── SECTION PILLS ── */
+  .section-bar {
+    padding:16px 24px;
+    display:flex; flex-wrap:wrap; gap:8px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+    position:sticky; top:65px; z-index:99;
+  }
+  .sec-pill {
+    padding:6px 16px; border-radius:999px;
+    border:1.5px solid var(--border); background:transparent;
+    color:var(--muted); font-family:'Sora',sans-serif; font-size:.78rem; font-weight:600;
+    cursor:pointer; transition:all .2s;
+  }
+  .sec-pill.active { background:var(--gold); color:#000; border-color:var(--gold); }
+  .sec-pill:hover:not(.active) { border-color:var(--gold-dim); color:var(--gold); }
+
+  /* ── MAIN ── */
+  main { max-width:820px; margin:0 auto; padding:32px 24px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { margin-bottom:28px; }
+  .progress-top { display:flex; justify-content:space-between; margin-bottom:8px; font-size:.8rem; color:var(--muted); }
+  .progress-bar { height:4px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; background:var(--gold); border-radius:4px; transition:width .4s; }
+
+  /* ── QUESTION CARD ── */
+  .q-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:28px 32px;
+    margin-bottom:20px;
+    animation:fadeUp .35s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+  .q-meta {
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .q-num {
+    font-family:'JetBrains Mono',monospace; font-size:.78rem; font-weight:600;
+    color:var(--gold); background:#1a1500; border:1px solid #3a2e00;
+    padding:3px 10px; border-radius:6px;
+  }
+  .q-section {
+    font-size:.75rem; color:var(--muted); background:var(--surface);
+    border:1px solid var(--border); padding:3px 10px; border-radius:6px;
+  }
+
+  .q-text { font-size:1.05rem; font-weight:600; line-height:1.6; margin-bottom:20px; }
+
+  /* ── OPTIONS ── */
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .option {
+    display:flex; align-items:flex-start; gap:14px;
+    padding:14px 18px; border-radius:12px;
+    border:1.5px solid var(--border); background:var(--surface);
+    cursor:pointer; transition:all .18s; position:relative;
+  }
+  .option:hover { border-color:var(--accent); background:#1a2035; }
+  .option.correct { border-color:var(--green) !important; background:var(--green-bg) !important; }
+  .option.wrong   { border-color:var(--red)   !important; background:var(--red-bg)   !important; }
+
+  /* LEARN MODE: correct always shown */
+  .option.learn-correct { border-color:var(--green); background:var(--green-bg); }
+
+  .opt-letter {
+    font-family:'JetBrains Mono',monospace; font-weight:600; font-size:.85rem;
+    min-width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+    border-radius:6px; background:var(--border); color:var(--muted);
+    flex-shrink:0; margin-top:1px;
+  }
+  .option.learn-correct .opt-letter, .option.correct .opt-letter { background:var(--green); color:#000; }
+  .option.wrong .opt-letter { background:var(--red); color:#000; }
+  .opt-text { font-size:.92rem; line-height:1.5; }
+
+  /* ── EXPLANATION ── */
+  .explanation {
+    margin-top:16px; padding:14px 18px;
+    background:#0a1220; border:1px solid #1a3050; border-radius:10px;
+    font-size:.88rem; line-height:1.6; color:#a0c4e8;
+  }
+  .explanation strong { color:var(--gold); }
+
+  /* ── TEST NAV BUTTONS ── */
+  .q-nav { display:flex; gap:12px; margin-top:20px; align-items:center; }
+  .btn {
+    padding:10px 24px; border-radius:10px; border:none;
+    font-family:'Sora',sans-serif; font-weight:700; font-size:.88rem;
+    cursor:pointer; transition:all .18s;
+  }
+  .btn-primary { background:var(--gold); color:#000; }
+  .btn-primary:hover { background:var(--gold-dim); }
+  .btn-secondary { background:var(--surface); color:var(--text); border:1.5px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  /* ── SCORE PANEL ── */
+  .score-panel {
+    text-align:center; padding:60px 20px;
+  }
+  .score-big { font-size:5rem; font-weight:800; color:var(--gold); line-height:1; }
+  .score-label { font-size:1.1rem; color:var(--muted); margin-top:8px; margin-bottom:32px; }
+  .score-breakdown { display:flex; justify-content:center; gap:40px; margin-bottom:40px; }
+  .sb-item { text-align:center; }
+  .sb-num { font-size:2rem; font-weight:800; }
+  .sb-num.correct { color:var(--green); }
+  .sb-num.wrong { color:var(--red); }
+  .sb-desc { font-size:.8rem; color:var(--muted); margin-top:4px; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align:center; padding:80px 20px; color:var(--muted); }
+  .empty-icon { font-size:3rem; margin-bottom:16px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+  @media(max-width:600px){
+    header { flex-direction:column; gap:12px; }
+    .q-card { padding:20px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🇪🇸 Español<span>MCQ</span></div>
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="setMode('learn')">📖 Learn</button>
+    <button class="mode-tab" onclick="setMode('test')">✏️ Test</button>
+  </div>
+</header>
+
+<div class="section-bar" id="sectionBar"></div>
+
+<main id="mainContent"></main>
+
+<script>
+// ──────────────────────────────────────────────
+// DATA
+// ──────────────────────────────────────────────
+const RAW = [
+  // Articles
+  {n:1,s:"Articles",q:"Choose the correct indefinite article: Quiero comprar ___ coche.",opts:["El","La","Un","Los"],a:"C",e:"'Coche' is masculine singular, so the indefinite article is 'un'."},
+  {n:2,s:"Articles",q:"Choose the correct indefinite article for the noun 'libro' (book) in Spanish.",opts:["una","un","unos","unas"],a:"B",e:"'Libro' is masculine singular → 'un libro'."},
+  {n:3,s:"Articles",q:"Choose the correct option: ___ agua fría es buena para la salud.",opts:["la","el","una","unas"],a:"B",e:"'Agua' is feminine but starts with a stressed 'a', so it takes the masculine article 'el' in singular."},
+  {n:4,s:"Articles",q:"___ manzanas están muy rojas hoy.",opts:["El","Las","Los","Una"],a:"B",e:"'Manzanas' is feminine plural → 'Las'."},
+  {n:5,s:"Articles",q:"Fill in the blank: ___ sol brilla en ___ cielo.",opts:["El / el","La / la","Un / una","El / la"],a:"A",e:"Both 'sol' and 'cielo' are masculine → 'El sol brilla en el cielo'."},
+  {n:6,s:"Articles",q:"___ estudiantes están en clase.",opts:["el","la","los","una"],a:"C",e:"'Estudiantes' is masculine plural → 'los'."},
+  {n:7,s:"Articles",q:"Choose the correct article: ___ águila vuela alto.",opts:["la","el","una","unas"],a:"B",e:"'Águila' is feminine but begins with stressed 'a', so it takes 'el' in singular."},
+  {n:8,s:"Articles",q:"___ mesa tiene ___ caramelos.",opts:["El / los","La / los","La / las","El / las"],a:"B",e:"'Mesa' is feminine → 'La'; 'caramelos' is masculine plural → 'los'."},
+  {n:9,s:"Articles",q:"___ coche es muy rápido.",opts:["La","El","Una","Los"],a:"B",e:"'Coche' is masculine singular → 'El'."},
+  {n:10,s:"Articles",q:"___ mamá y ___ papá están en ___ piso.",opts:["La / el / el","El / la / la","La / la / el","El / el / la"],a:"A",e:"'Mamá' is feminine → 'la'; 'papá' is masculine → 'el'; 'piso' is masculine → 'el'."},
+  {n:11,s:"Articles",q:"Choose the correct article: ___ libro",opts:["un","una","unos","unas"],a:"A",e:"'Libro' is masculine singular → indefinite article 'un'."},
+  {n:12,s:"Articles",q:"\"Las casas en esta calle son muy ____.\"",opts:["Blanco","Blanca","Blancos","Blancas"],a:"D",e:"Adjectives must agree with the noun. 'Casas' is feminine plural → 'blancas'."},
+  // Pronouns
+  {n:13,s:"Pronouns",q:"What is the Spanish subject pronoun for 'they' (mixed or masculine group)?",opts:["Ellas","Ustedes","Ellos","Nosotros"],a:"C",e:"'Ellos' is used for masculine or mixed-gender groups; 'ellas' is for all-female groups."},
+  {n:14,s:"Pronouns",q:"In Spain, which pronoun is used as the informal plural 'you' for a group of females?",opts:["Ustedes","Ellas","Vosotras","Nosotras"],a:"C",e:"'Vosotras' is the feminine form of 'vosotros', used in Spain for an all-female group."},
+  {n:15,s:"Pronouns",q:"Which sentence uses the correct indirect object pronoun? 'I give the book to her.'",opts:["Yo le doy el libro.","Yo la doy el libro.","Yo lo doy el libro.","Yo se doy el libro."],a:"A",e:"The indirect object pronoun for 'her' is 'le'. 'La' is a direct object pronoun."},
+  {n:16,s:"Pronouns",q:"Which sentence correctly uses the indirect object pronoun? 'We tell him the truth.'",opts:["Nosotros le decimos la verdad.","Nosotros lo decimos la verdad.","Nosotros la decimos la verdad.","Nosotros se decimos la verdad."],a:"A",e:"Indirect object pronoun for 'him' is 'le'."},
+  {n:17,s:"Pronouns",q:"Which sentence correctly describes what 'you' (tú) think?",opts:["Tú pensas que el libro es bueno.","Tú piensas que el libro es bueno.","Tú pienso que el libro es bueno.","Tú pensen que el libro es bueno."],a:"B",e:"The correct stem-changing conjugation of 'pensar' for tú is 'piensas'."},
+  {n:18,s:"Pronouns",q:"Yo ___ Dora.",opts:["soy","tu","ella","ellas"],a:"A",e:"First person singular of 'ser' is 'soy'."},
+  {n:19,s:"Pronouns",q:"Mis amigos ___ muy simpáticos.",opts:["Es","Está","Hay","Son"],a:"D",e:"'Amigos' is third person plural → 'son' (from ser)."},
+  {n:20,s:"Pronouns",q:"Ella ___ cansada.",opts:["soy","estás","está","estamos"],a:"C",e:"Third person singular of 'estar' is 'está'. Tiredness is a temporary state."},
+  // Prepositions
+  {n:21,s:"Prepositions",q:"Voy ___ mercado esta tarde.",opts:["a el","al","del","el"],a:"B",e:"'A + el' contracts to 'al' in Spanish. 'Voy al mercado'."},
+  {n:22,s:"Prepositions",q:"El libro está ___ la mesa.",opts:["en","de","por","para"],a:"A",e:"'En' is used to indicate location: 'The book is on the table'."},
+  {n:23,s:"Prepositions",q:"Vengo ___ España.",opts:["a","en","de","por"],a:"C",e:"'De' indicates origin: 'I come from Spain'."},
+  {n:24,s:"Prepositions",q:"Voy ___ la tienda ___ comprar leche.",opts:["a / por","en / para","a / para","de / a"],a:"C",e:"'A' indicates direction; 'para' indicates purpose."},
+  {n:25,s:"Prepositions",q:"Estudio ___ la mañana.",opts:["por","para","de","en"],a:"A",e:"'Por' is used with parts of the day: 'por la mañana' (in the morning)."},
+  {n:26,s:"Prepositions",q:"¿Cuánto pagaste ___ ese libro?",opts:["para","por","de","en"],a:"B",e:"'Por' expresses exchange: 'How much did you pay for that book?'"},
+  {n:27,s:"Prepositions",q:"Este regalo es ___ ti.",opts:["por","para","de","en"],a:"B",e:"'Para' is used to express recipient: 'This gift is for you'."},
+  {n:28,s:"Prepositions",q:"La farmacia está ___ el banco.",opts:["entre","detrás","cerca de","al lado de"],a:"D",e:"'Al lado de' means 'next to'. The pharmacy is next to the bank."},
+  {n:29,s:"Prepositions",q:"Hablan ___ el teléfono.",opts:["en","por","de","a"],a:"B",e:"'Por' is used for means of communication: 'They speak by phone'."},
+  {n:30,s:"Prepositions",q:"Caminé ___ el parque.",opts:["por","para","de","en"],a:"A",e:"'Por' expresses movement through a place: 'I walked through the park'."},
+  // Verb Conjugation
+  {n:31,s:"Verb Conjugation",q:"Yo ___ en casa. (estar)",opts:["está","estoy","estás","están"],a:"B",e:"First person singular of 'estar' is 'estoy'."},
+  {n:32,s:"Verb Conjugation",q:"Tú ___ un pastel delicioso. (hacer)",opts:["hago","haces","hace","hacemos"],a:"B",e:"Second person singular of 'hacer' is 'haces'."},
+  {n:33,s:"Verb Conjugation",q:"Nosotros ___ la tarea juntos. (hacer)",opts:["hago","hacen","hacemos","haces"],a:"C",e:"First person plural of 'hacer' is 'hacemos'."},
+  {n:34,s:"Verb Conjugation",q:"\"Yo ___ la tarea en la biblioteca.\" (hacer)",opts:["Hace","Hago","Haces","Hacemos"],a:"B",e:"First person singular of 'hacer' is 'hago'."},
+  {n:35,s:"Verb Conjugation",q:"Nosotros ___ ejercicio por la mañana. (hacer)",opts:["hacen","hacemos","hago","hace"],a:"B",e:"'Hacemos' is the nosotros form of 'hacer'."},
+  {n:36,s:"Verb Conjugation",q:"\"Normalmente, yo ___ la tarea por la noche.\"",opts:["hice","haré","hago","haría"],a:"C",e:"Habitual present action → present tense: 'hago'."},
+  {n:37,s:"Verb Conjugation",q:"Nosotros ___ terminado el proyecto. (haber)",opts:["ha","han","hemos","he"],a:"C",e:"'Hemos' is the present perfect auxiliary for 'nosotros'."},
+  {n:38,s:"Verb Conjugation",q:"What is the correct way to say 'there is' or 'there are' in the present tense?",opts:["Había","Hay","Habrá","Han"],a:"B",e:"'Hay' is the impersonal form of 'haber' for present: 'there is/are'."},
+  {n:39,s:"Verb Conjugation",q:"En la fiesta ___ mucha gente.",opts:["habían","había","hay","han"],a:"B",e:"Imperfect of 'haber' for past 'there was' is 'había' (always singular)."},
+  {n:40,s:"Verb Conjugation",q:"Si tuviera dinero, ___ un coche nuevo. (comprar)",opts:["compro","compraré","compraría","compre"],a:"C",e:"Conditional sentences with 'si + imperfect subjunctive' use the conditional tense: 'compraría'."},
+  {n:41,s:"Verb Conjugation",q:"La reunión ___ en la sala principal. (ser)",opts:["está","es","hay","fue"],a:"B",e:"'Ser' is used for scheduled events. Third person singular is 'es'."},
+  {n:42,s:"Verb Conjugation",q:"Nosotros ___ felices. (ser)",opts:["somos","es","soy","son"],a:"A",e:"First person plural of 'ser' is 'somos'."},
+  {n:43,s:"Verb Conjugation",q:"Mi profesor ___ muy amable. (ser)",opts:["es","está","hace","son"],a:"A",e:"Permanent traits use 'ser'. Third person singular is 'es'."},
+  {n:44,s:"Verb Conjugation",q:"Ella ___ muy inteligente. (ser)",opts:["está","es","soy","estamos"],a:"B",e:"Permanent characteristic → 'ser'. Third person singular is 'es'."},
+  {n:45,s:"Verb Conjugation",q:"Nosotros ___ listos para el examen. (estar)",opts:["están","estamos","está","eres"],a:"B",e:"Temporary state → 'estar'. First person plural is 'estamos'."},
+  {n:46,s:"Verb Conjugation",q:"Esta mañana, antes de salir de casa, yo ya ___ desayunado. (haber)",opts:["he","había","habré","haya"],a:"B",e:"Past action completed before another past action uses past perfect: 'había'."},
+  {n:47,s:"Verb Conjugation",q:"Which is the correct conjugation of 'poder' for 'nosotros'?",opts:["Pueden","Podemos","Podeis","Puedes"],a:"B",e:"'Podemos' — the nosotros form of 'poder'. The o→ue stem change does NOT apply to nosotros."},
+  {n:48,s:"Verb Conjugation",q:"Complete the sentence: '¿___ tú venir mañana?' (poder)",opts:["Puedes","Puede","Podéis","Puedo"],a:"A",e:"Second person singular of 'poder' is 'puedes' (o→ue stem change)."},
+  {n:49,s:"Verb Conjugation",q:"Choose the correct Spanish sentence for: 'They study a lot.'",opts:["Ellos estudios mucho","Ellos estudian mucho","Ellos estudios muy","Ellos estudia muy"],a:"B",e:"Third person plural of 'estudiar' is 'estudian'."},
+  {n:50,s:"Verb Conjugation",q:"Choose the correct Spanish sentence for: 'She is very intelligent.'",opts:["Ella es muy inteligente","Ella está muy inteligente","Ella tiene muy inteligente","Ella muy es inteligente"],a:"A",e:"Permanent trait → 'ser'. Correct word order: subject + verb + adverb + adjective."},
+  // Numbers
+  {n:51,s:"Numbers",q:"What is the Spanish word for 500?",opts:["Quinientos","Cuatrocientos","Seiscientos","Trescientos"],a:"A",e:"Quinientos = 500."},
+  {n:52,s:"Numbers",q:"How do you say 1,000 in Spanish?",opts:["Cien","Ciento","Mil","Millón"],a:"C",e:"'Mil' = 1,000. 'Cien' = 100; 'ciento' is used for 101–199."},
+  {n:53,s:"Numbers",q:"How do you write 352 in Spanish?",opts:["Trescientos cincuenta y dos","Tres cientos cincuenta dos","Trescientos y cincuenta dos","Trescientas cincuenta y dos"],a:"A",e:"Hundreds are written as one word (trescientos), no 'y' between hundreds and tens."},
+  {n:54,s:"Numbers",q:"How do you correctly say 99,000 in Spanish?",opts:["Noventa y nueve miles","Noventa y nueve mil","Novecientos noventa mil","Noventa nueve mil"],a:"B",e:"Thousands in Spanish never pluralize: 'noventa y nueve mil', not 'miles'."},
+  {n:55,s:"Numbers",q:"A store bill reads 'doscientos cuarenta y siete euros.' What is the amount in numbers?",opts:["€274","€247","€724","€472"],a:"B",e:"Doscientos = 200, cuarenta = 40, siete = 7 → 247."},
+  {n:56,s:"Numbers",q:"What is 'cuatro mil setecientos treinta y ocho' in digits?",opts:["4,738","4,783","4,378","4,873"],a:"A",e:"Cuatro mil = 4,000; setecientos = 700; treinta y ocho = 38 → 4,738."},
+  {n:57,s:"Numbers",q:"What is 'cinco mil doscientos cuarenta y uno' in digits?",opts:["5,421","5,241","5,142","5,412"],a:"B",e:"Cinco mil = 5,000; doscientos = 200; cuarenta y uno = 41 → 5,241."},
+  {n:58,s:"Numbers",q:"What is the Spanish word for 700?",opts:["Setecientos","Ochocientos","Novecientos","Seiscientos"],a:"A",e:"Setecientos = 700."},
+  {n:59,s:"Numbers",q:"How do you write 1,245 in Spanish?",opts:["Mil doscientos cuarenta y cinco","Mil doscientos cuarenta cinco","Mil doscientos y cuarenta cinco","Milésimo doscientos cuarenta y cinco"],a:"A",e:"Mil + doscientos + cuarenta y cinco. No 'y' after 'mil' or hundreds."},
+  {n:60,s:"Numbers",q:"A receipt reads 'cuatrocientos ochenta y seis euros.' What is the amount in numbers?",opts:["€468","€486","€846","€684"],a:"B",e:"Cuatrocientos = 400, ochenta = 80, seis = 6 → 486."},
+  {n:61,s:"Numbers",q:"How do you correctly say 15,000 in Spanish?",opts:["Quince miles","Quince mil","Cincuenta mil","Quinientos mil"],a:"B",e:"'Mil' does not pluralize: 'quince mil'."},
+  // Days
+  {n:62,s:"Days of the Week",q:"How do you say 'Monday' in Spanish?",opts:["Martes","Miércoles","Lunes","Jueves"],a:"C",e:"Lunes = Monday."},
+  {n:63,s:"Days of the Week",q:"How do you say 'Friday' in Spanish?",opts:["Jueves","Viernes","Sábado","Domingo"],a:"B",e:"Viernes = Friday."},
+  {n:64,s:"Days of the Week",q:"Which day comes after 'miércoles' (Wednesday)?",opts:["Martes","Lunes","Jueves","Viernes"],a:"C",e:"Jueves (Thursday) comes after miércoles (Wednesday)."},
+  {n:65,s:"Days of the Week",q:"What is 'el fin de semana' in English?",opts:["Weekday","Weekend","Holiday","Vacation"],a:"B",e:"'Fin de semana' = weekend (Saturday and Sunday)."},
+  {n:66,s:"Days of the Week",q:"How do you say 'Sunday' in Spanish?",opts:["Sábado","Lunes","Domingo","Martes"],a:"C",e:"Domingo = Sunday."},
+  {n:67,s:"Days of the Week",q:"Which of the following is 'Tuesday' in Spanish?",opts:["Lunes","Martes","Miércoles","Jueves"],a:"B",e:"Martes = Tuesday."},
+  {n:68,s:"Days of the Week",q:"In Spanish-speaking countries, which day is typically considered the first day of the week?",opts:["Domingo","Sábado","Lunes","Martes"],a:"C",e:"Lunes (Monday) is considered the first day of the week in Spanish-speaking countries."},
+  {n:69,s:"Days of the Week",q:"How do you say 'Today is Wednesday' in Spanish?",opts:["Hoy es martes.","Hoy es miércoles.","Hoy es jueves.","Hoy es viernes."],a:"B",e:"Miércoles = Wednesday. 'Hoy es miércoles'."},
+  {n:70,s:"Days of the Week",q:"How do you say 'Thursday' in Spanish?",opts:["Viernes","Sábado","Miércoles","Jueves"],a:"D",e:"Jueves = Thursday."},
+  {n:71,s:"Days of the Week",q:"How do you say 'Saturday' in Spanish?",opts:["Domingo","Lunes","Sábado","Viernes"],a:"C",e:"Sábado = Saturday."},
+  // Colors
+  {n:72,s:"Colors",q:"What is the Spanish word for 'red'?",opts:["Azul","Rojo","Verde","Amarillo"],a:"B",e:"Rojo = red."},
+  {n:73,s:"Colors",q:"How do you say 'blue' in Spanish?",opts:["Azul","Verde","Morado","Gris"],a:"A",e:"Azul = blue."},
+  {n:74,s:"Colors",q:"What color is 'amarillo'?",opts:["Green","Orange","Yellow","Purple"],a:"C",e:"Amarillo = yellow."},
+  {n:75,s:"Colors",q:"What is 'negro' in English?",opts:["White","Gray","Brown","Black"],a:"D",e:"Negro = black."},
+  {n:76,s:"Colors",q:"How do you say 'green' in Spanish?",opts:["Verde","Rojo","Azul","Blanco"],a:"A",e:"Verde = green."},
+  {n:77,s:"Colors",q:"What color is 'blanco'?",opts:["Black","White","Gray","Brown"],a:"B",e:"Blanco = white."},
+  {n:78,s:"Colors",q:"How do you say 'orange' in Spanish?",opts:["Morado","Naranja","Rosa","Café"],a:"B",e:"Naranja = orange."},
+  {n:79,s:"Colors",q:"What is the Spanish word for 'purple'?",opts:["Morado","Rosa","Marrón","Azul"],a:"A",e:"Morado = purple."},
+  {n:80,s:"Colors",q:"What does 'rosa' mean in English?",opts:["Red","Orange","Pink","Purple"],a:"C",e:"Rosa = pink."},
+  {n:81,s:"Colors",q:"What is the Spanish word for 'brown'?",opts:["Gris","Negro","Marrón","Azul"],a:"C",e:"Marrón = brown (also 'café' in Latin America)."},
+  {n:82,s:"Colors",q:"\"La camisa es ___\". (The shirt is grey.)",opts:["roja","gris","verde","azul"],a:"B",e:"Gris = grey/gray."},
+  {n:83,s:"Colors",q:"Which sentence is grammatically correct? (El cielo / azul)",opts:["El cielo es azules.","El cielo es azul.","El cielo están azul.","El cielo son azul."],a:"B",e:"'Cielo' is masculine singular → 'azul' (invariable adjective)."},
+  // Telling Time
+  {n:84,s:"Telling Time",q:"Choose the correct translation for 10:30.",opts:["Son las diez y media","Son las diez y cuarto","Son las diez menos media","Es la diez y media"],a:"A",e:"'Y media' means 'half past'. 10:30 → 'Son las diez y media'."},
+  {n:85,s:"Telling Time",q:"How do you say 'It is one o'clock' in Spanish?",opts:["Es la una","Son las una","Es las una","Son la una"],a:"A",e:"Only 1 o'clock uses 'Es la una' (singular). All other hours use 'Son las...'."},
+  {n:86,s:"Telling Time",q:"¿Cómo se dice 'It is 1:15' en español?",opts:["Son las una y cuarto.","Es la una y quince.","Son las trece y cuarto.","Es la una y cuarto."],a:"D",e:"1:15 → 'Es la una y cuarto.' Both 'quince' and 'cuarto' are acceptable."},
+  {n:87,s:"Telling Time",q:"How do you say 'It is midnight'?",opts:["Es la medianoche.","Son las doce de la tarde.","Son las doce de la mañana.","Es las doce."],a:"A",e:"'Es la medianoche' or 'Son las doce de la noche'."},
+  {n:88,s:"Telling Time",q:"¿Qué hora es? (3:00)",opts:["Son las tres","Es la una","Son las dos","Son las cuatro"],a:"A",e:"3:00 → 'Son las tres en punto'."},
+  {n:89,s:"Telling Time",q:"¿Qué hora es? (4:45)",opts:["Son las cuatro y cuarenta y cinco","Son las cinco menos cuarto","Es las cinco menos cuarto","Son cuatro menos cuarto"],a:"B",e:"4:45 = 15 minutes to 5 → 'Son las cinco menos cuarto'."},
+  {n:90,s:"Telling Time",q:"What is the correct way to say '8:30' in Spanish?",opts:["Son las ocho y media","Son las ocho y medio","Es las ocho y treinta","Son las ocho de la media"],a:"A",e:"'Media' (half) is feminine → 'y media'. 8:30 → 'Son las ocho y media'."},
+  {n:91,s:"Telling Time",q:"¿Qué significa 'Son las nueve menos cuarto'?",opts:["9:15","8:45","9:45","8:15"],a:"B",e:"'Menos cuarto' = minus 15 minutes. 9:00 − 0:15 = 8:45."},
+  {n:92,s:"Telling Time",q:"Son las cinco menos cuarto. ¿Qué hora es?",opts:["4:45","5:45","20:45","1:45"],a:"A",e:"5:00 − 0:15 = 4:45."},
+  {n:93,s:"Telling Time",q:"¿Qué hora es: 'Son las diez y veinte'?",opts:["10:02","10:20","9:40","10:12"],a:"B",e:"'Y veinte' means 'plus twenty minutes'. 10:20."},
+  {n:94,s:"Telling Time",q:"¿Cómo se dice '7:15' en español?",opts:["Son las siete y cuarto","Son las siete y media","Son las siete en punto","Son las ocho menos cuarto"],a:"A",e:"7:15 → 'Son las siete y cuarto' ('cuarto' = quarter)."},
+  {n:95,s:"Telling Time",q:"¿Cómo se dice '1:30' en español?",opts:["Son las una y media","Es la una y media","Es la uno y treinta","Son las una y treinta"],a:"B",e:"1:30 → 'Es la una y media'."},
+  {n:96,s:"Telling Time",q:"¿Cómo se dice '2:45' en español?",opts:["Son las dos y cuarenta y cinco","Es la dos y cuarenta y cinco","Son las dos menos cuarto","Es las dos menos cuarto"],a:"C",e:"2:45 = 15 minutes to 3 → 'Son las tres menos cuarto'."},
+  {n:97,s:"Telling Time",q:"¿Cómo se dice '8:50' en español?",opts:["Son las ocho y cincuenta","Son las nueve menos diez","Son las ocho menos diez","Son las nueve y diez"],a:"B",e:"8:50 = 10 minutes to 9 → 'Son las nueve menos diez'."},
+  {n:98,s:"Telling Time",q:"Son las seis y siete. ¿Qué hora es?",opts:["7:16","6:07","7:06","6:17"],a:"B",e:"'Son las seis y siete' = 6:07."},
+  // Articles extended
+  {n:99,s:"Articles",q:"Choose the correct definite article for 'niña'.",opts:["el","la","los","las"],a:"B",e:"'Niña' is feminine singular → 'la'."},
+  {n:100,s:"Articles",q:"Choose the correct indefinite article for 'casas'.",opts:["una","un","unas","unos"],a:"C",e:"'Casas' is feminine plural → 'unas'."},
+  {n:101,s:"Articles",q:"___ perros son muy juguetones.",opts:["El","La","Los","Una"],a:"C",e:"'Perros' is masculine plural → 'Los'."},
+  {n:102,s:"Articles",q:"Necesito ___ bolígrafo para escribir.",opts:["una","unos","un","el"],a:"C",e:"'Bolígrafo' is masculine singular → indefinite 'un'."},
+  {n:103,s:"Articles",q:"¿Dónde está ___ baño?",opts:["el","la","un","una"],a:"A",e:"'Baño' is masculine → definite article 'el'."},
+  {n:104,s:"Articles",q:"___ leche está fría.",opts:["El","La","Los","Las"],a:"B",e:"'Leche' is feminine → 'La'."},
+  {n:105,s:"Articles",q:"Compré ___ zapatos nuevos.",opts:["un","una","unos","unas"],a:"C",e:"'Zapatos' is masculine plural → 'unos'."},
+  {n:106,s:"Articles",q:"Choose the correct article: ___ árbol es muy grande.",opts:["La","El","Una","Los"],a:"B",e:"'Árbol' is masculine singular → 'El'."},
+  {n:107,s:"Articles",q:"___ idiomas son difíciles de aprender.",opts:["El","La","Los","Las"],a:"C",e:"'Idiomas' is masculine plural → 'Los'."},
+  {n:108,s:"Articles",q:"¿Cuánto cuesta ___ manzana?",opts:["el","la","un","una"],a:"D",e:"'Manzana' is feminine singular → indefinite 'una'."},
+  {n:109,s:"Articles",q:"Tengo ___ hambre terrible.",opts:["un","una","el","la"],a:"A",e:"'Hambre' is feminine but starts with stressed 'a' → takes 'un' in singular."},
+  {n:110,s:"Articles",q:"___ agua del río es muy clara.",opts:["El","La","Un","Una"],a:"A",e:"'Agua' takes 'El' in singular due to the stressed 'a' at the start, even though it's feminine."},
+  {n:111,s:"Articles",q:"Ella es ___ médica muy buena.",opts:["un","una","el","la"],a:"B",e:"Indefinite article with profession + adjective: 'una médica'."},
+  {n:112,s:"Articles",q:"___ lunes tengo clase de español.",opts:["El","La","Los","Las"],a:"C",e:"Days of the week used habitually take 'los': 'Los lunes'."},
+  {n:113,s:"Articles",q:"Vi ___ película muy interesante ayer.",opts:["un","una","el","la"],a:"B",e:"'Película' is feminine → indefinite 'una'."},
+  // Pronouns extended
+  {n:114,s:"Pronouns",q:"What is the subject pronoun for 'I' in Spanish?",opts:["Yo","Tú","Él","Me"],a:"A",e:"'Yo' = I (first person singular)."},
+  {n:115,s:"Pronouns",q:"What is the subject pronoun for 'you' (informal) in Spanish?",opts:["Usted","Vos","Tú","Te"],a:"C",e:"'Tú' is the informal second person singular subject pronoun."},
+  {n:116,s:"Pronouns",q:"Which is the correct direct object pronoun for 'him'?",opts:["le","lo","la","les"],a:"B",e:"'Lo' is the masculine direct object pronoun for 'him/it'."},
+  {n:117,s:"Pronouns",q:"Which pronoun replaces 'a María' in the sentence 'Llamo a María'?",opts:["lo","la","le","se"],a:"B",e:"'María' is a direct object and feminine → 'la'. 'Llamo a María' → 'La llamo'."},
+  {n:118,s:"Pronouns",q:"Complete: '___ gusta el café.' (He likes coffee.)",opts:["Lo","Le","La","Se"],a:"B",e:"'Gustar' uses indirect object pronouns. Third person singular → 'Le gusta'."},
+  {n:119,s:"Pronouns",q:"Which is the reflexive pronoun for 'nosotros'?",opts:["se","me","nos","os"],a:"C",e:"The reflexive pronoun for 'nosotros' is 'nos'."},
+  {n:120,s:"Pronouns",q:"Choose the correct pronoun: 'Él ___ habló ayer.' (He spoke to me yesterday.)",opts:["me","te","le","lo"],a:"A",e:"Indirect object 'to me' = 'me'."},
+  {n:121,s:"Pronouns",q:"Which sentence is correct? (I wash myself.)",opts:["Yo me lavo.","Yo me lava.","Yo se lavo.","Yo te lavo."],a:"A",e:"Reflexive: 'me' for first person. 'Yo me lavo'."},
+  {n:122,s:"Pronouns",q:"What does 'os' refer to in Spanish?",opts:["Them","Us","You all (Spain, informal)","Yourselves"],a:"C",e:"'Os' is the second person plural informal pronoun used in Spain (vosotros form)."},
+  {n:123,s:"Pronouns",q:"Choose the correct form: 'She sees ___ every day.' (them, masculine)",opts:["la","le","los","les"],a:"C",e:"Direct object pronoun for masculine plural = 'los'."},
+  {n:124,s:"Pronouns",q:"Complete: 'A nosotros ___ encanta bailar.'",opts:["me","te","nos","les"],a:"C",e:"Indirect object for 'nosotros' = 'nos'."},
+  {n:125,s:"Pronouns",q:"What does 'se' indicate in a reflexive sentence?",opts:["Direct object","Third person reflexive pronoun","Subject pronoun","Plural marker"],a:"B",e:"'Se' is the reflexive pronoun for él/ella/usted/ellos/ellas/ustedes."},
+  {n:126,s:"Pronouns",q:"Choose the correct sentence: 'I give it (the book, masculine) to you.'",opts:["Te lo doy.","Te la doy.","Le lo doy.","Lo te doy."],a:"A",e:"Double object pronouns: indirect (te) before direct (lo). 'Te lo doy'."},
+  {n:127,s:"Pronouns",q:"Which pronoun is used for 'you' (formal, singular) in most Spanish-speaking countries?",opts:["Tú","Vos","Usted","Vosotros"],a:"C",e:"'Usted' is the formal second person singular, using third-person verb conjugation."},
+  {n:128,s:"Pronouns",q:"Complete: 'Ellos ___ escribieron una carta.' (They wrote her a letter.)",opts:["lo","la","le","se"],a:"C",e:"Indirect object for 'her' = 'le'. 'Le escribieron una carta'."},
+  // Prepositions extended
+  {n:129,s:"Prepositions",q:"El gato está ___ la caja. (inside)",opts:["sobre","bajo","dentro de","fuera de"],a:"C",e:"'Dentro de' = inside. 'El gato está dentro de la caja'."},
+  {n:130,s:"Prepositions",q:"La lámpara está ___ la mesa. (above)",opts:["debajo de","delante de","encima de","detrás de"],a:"C",e:"'Encima de' = on top of / above."},
+  {n:131,s:"Prepositions",q:"Vivo ___ Madrid.",opts:["a","en","de","por"],a:"B",e:"'En' is used for location of residence: 'I live in Madrid'."},
+  {n:132,s:"Prepositions",q:"Salgo ___ casa a las ocho.",opts:["de","a","en","para"],a:"A",e:"'De' indicates departure from a place: 'I leave from home'."},
+  {n:133,s:"Prepositions",q:"El perro está ___ el sofá. (under)",opts:["sobre","encima de","debajo de","entre"],a:"C",e:"'Debajo de' = under/beneath."},
+  {n:134,s:"Prepositions",q:"La tienda está ___ el hospital y el banco.",opts:["al lado de","detrás de","entre","encima de"],a:"C",e:"'Entre' = between. 'La tienda está entre el hospital y el banco'."},
+  {n:135,s:"Prepositions",q:"Estoy aquí ___ ayudarte.",opts:["por","para","de","en"],a:"B",e:"'Para' expresses purpose: 'I am here to help you'."},
+  {n:136,s:"Prepositions",q:"Viajé ___ tren.",opts:["en","por","de","a"],a:"A",e:"'En' is used with modes of transport: 'Viajé en tren'."},
+  {n:137,s:"Prepositions",q:"Gracias ___ tu ayuda.",opts:["por","para","de","a"],a:"A",e:"'Por' expresses cause/reason: 'Thank you for your help'."},
+  {n:138,s:"Prepositions",q:"El cuadro está ___ la pared. (on)",opts:["en","sobre","de","entre"],a:"B",e:"'Sobre' = on/upon (for vertical surfaces). 'El cuadro está sobre la pared'."},
+  // Verb Conjugation extended
+  {n:139,s:"Verb Conjugation",q:"Conjugate 'hablar' for 'tú' in the present tense.",opts:["hablo","hablas","habla","habláis"],a:"B",e:"'Tú hablas' — standard -ar conjugation for second person singular."},
+  {n:140,s:"Verb Conjugation",q:"Conjugate 'comer' for 'ellos' in the present tense.",opts:["come","comes","comen","coméis"],a:"C",e:"'Ellos comen' — third person plural of -er verb 'comer'."},
+  {n:141,s:"Verb Conjugation",q:"Conjugate 'vivir' for 'yo' in the present tense.",opts:["vives","vive","vivís","vivo"],a:"D",e:"'Yo vivo' — first person singular of -ir verb 'vivir'."},
+  {n:142,s:"Verb Conjugation",q:"What is the 'usted' form of 'tener' in the present tense?",opts:["tengo","tienes","tiene","tenemos"],a:"C",e:"'Usted tiene' — 'tener' is irregular: yo tengo, tú tienes, él/usted tiene."},
+  {n:143,s:"Verb Conjugation",q:"Conjugate 'ir' for 'nosotros' in the present tense.",opts:["van","vais","vamos","va"],a:"C",e:"'Nosotros vamos' — 'ir' is highly irregular in the present tense."},
+  {n:144,s:"Verb Conjugation",q:"What is the 'yo' form of 'ser' in the present tense?",opts:["es","eres","somos","soy"],a:"D",e:"'Yo soy' — 'ser' is irregular: soy, eres, es, somos, sois, son."},
+  {n:145,s:"Verb Conjugation",q:"Conjugate 'querer' for 'ella' in the present tense.",opts:["quiero","quieres","quiere","queremos"],a:"C",e:"'Ella quiere' — stem-changing verb (e→ie)."},
+  {n:146,s:"Verb Conjugation",q:"What is the preterite (past) tense of 'hablar' for 'yo'?",opts:["hablé","hablaste","habló","hablamos"],a:"A",e:"First person singular preterite of -ar verbs: 'hablé'."},
+  {n:147,s:"Verb Conjugation",q:"What is the preterite of 'ir' for 'ellos'?",opts:["fueron","fuiste","fui","fuimos"],a:"A",e:"'Ir' and 'ser' share preterite forms. 'Ellos fueron'."},
+  {n:148,s:"Verb Conjugation",q:"Conjugate 'dormir' for 'tú' in the present tense.",opts:["durmo","duermes","duerme","dormís"],a:"B",e:"'Dormir' is a stem-changing verb (o→ue): yo duermo, tú duermes."},
+  {n:149,s:"Verb Conjugation",q:"What is the 'vosotros' form of 'hablar' in the present tense?",opts:["hablan","habláis","hablas","hablamos"],a:"B",e:"'Vosotros habláis' — vosotros form adds '-áis' for -ar verbs."},
+  {n:150,s:"Verb Conjugation",q:"Conjugate 'tener' for 'yo' in the present tense.",opts:["tiene","tienes","tengo","tenemos"],a:"C",e:"'Yo tengo' — 'tener' has an irregular 'yo' form."},
+  {n:151,s:"Verb Conjugation",q:"What is the future tense of 'hablar' for 'yo'?",opts:["hablaré","hablarás","hablará","hablaremos"],a:"A",e:"Future tense: infinitive + ending. 'Yo hablaré'."},
+  {n:152,s:"Verb Conjugation",q:"Choose the correct form: 'Ayer nosotros ___ al cine.' (ir)",opts:["vamos","vimos","fuimos","íbamos"],a:"C",e:"Preterite of 'ir' for nosotros = 'fuimos'."},
+  {n:153,s:"Verb Conjugation",q:"What is the imperative (command) for 'tú' with 'hablar'?",opts:["hablas","habla","hable","habléis"],a:"B",e:"Affirmative tú command for -ar verbs = third person singular: 'habla'."},
+  {n:154,s:"Verb Conjugation",q:"Conjugate 'poder' for 'ellos' in the present tense.",opts:["podemos","podéis","puedo","pueden"],a:"D",e:"'Ellos pueden' — stem-changing (o→ue)."},
+  {n:155,s:"Verb Conjugation",q:"What is the 'yo' form of 'saber' in the present tense?",opts:["sabes","sabe","sé","sabemos"],a:"C",e:"'Saber' has an irregular 'yo' form: 'yo sé'."},
+  {n:156,s:"Verb Conjugation",q:"Complete: 'Ella ___ música clásica.' (escuchar, present)",opts:["escucho","escuchas","escucha","escuchamos"],a:"C",e:"'Ella escucha' — third person singular of -ar verb."},
+  {n:157,s:"Verb Conjugation",q:"What is the conditional tense of 'comer' for 'nosotros'?",opts:["comeríamos","comemos","comeríais","comeremos"],a:"A",e:"Conditional: infinitive + conditional ending. 'Nosotros comeríamos'."},
+  {n:158,s:"Verb Conjugation",q:"Which sentence uses the subjunctive correctly?",opts:["Espero que ella viene.","Espero que ella venga.","Espero que ella vendrá.","Espero que ella vino."],a:"B",e:"'Esperar que' triggers the subjunctive mood: 'Espero que ella venga'."},
+  // Numbers extended
+  {n:159,s:"Numbers",q:"How do you say '21' in Spanish?",opts:["Veinte y uno","Veintiuno","Veinteuno","Veinte uno"],a:"B",e:"21 = 'veintiuno' (one word, no space)."},
+  {n:160,s:"Numbers",q:"How do you say '100' in Spanish?",opts:["Ciento","Cien","Mil","Cientos"],a:"B",e:"100 = 'cien' (used alone); 'ciento' is used for 101–199."},
+  {n:161,s:"Numbers",q:"How do you say '101' in Spanish?",opts:["Ciento uno","Cien uno","Cien y uno","Cientos uno"],a:"A",e:"101 = 'ciento uno'. 'Cien' becomes 'ciento' for 101–199."},
+  {n:162,s:"Numbers",q:"What is 'doscientos' in digits?",opts:["20","120","200","2,000"],a:"C",e:"Doscientos = 200."},
+  {n:163,s:"Numbers",q:"How do you say '1,000,000' in Spanish?",opts:["Mil","Millón","Billón","Cien mil"],a:"B",e:"1,000,000 = 'un millón'."},
+  {n:164,s:"Numbers",q:"How do you say '16' in Spanish?",opts:["Diez y seis","Dieciséis","Dieciseis","Seis y diez"],a:"B",e:"16 = 'dieciséis' (one word, with accent)."},
+  {n:165,s:"Numbers",q:"How do you say '200' when counting feminine nouns (e.g., 'doscientas páginas')?",opts:["doscientos páginas","doscientas páginas","dos cientos páginas","dos cienras páginas"],a:"B",e:"Hundreds agree in gender: 'doscientas' for feminine nouns."},
+  {n:166,s:"Numbers",q:"What is 'noventa' in digits?",opts:["19","90","900","9,000"],a:"B",e:"Noventa = 90."},
+  {n:167,s:"Numbers",q:"How do you say '50' in Spanish?",opts:["Cuarenta","Cincuenta","Sesenta","Setenta"],a:"B",e:"Cincuenta = 50."},
+  {n:168,s:"Numbers",q:"What is 'treinta y tres' in digits?",opts:["23","33","303","3,300"],a:"B",e:"Treinta = 30, tres = 3 → 33."},
+  // Days extended
+  {n:169,s:"Days of the Week",q:"How do you say 'on Mondays' (habitually) in Spanish?",opts:["El lunes","Los lunes","En lunes","A lunes"],a:"B",e:"Habitual days use the definite plural article: 'los lunes'."},
+  {n:170,s:"Days of the Week",q:"What is the abbreviation for 'miércoles' in a Spanish calendar?",opts:["Ma","Mi","Ju","Vi"],a:"B",e:"Miércoles is abbreviated as 'Mi' or 'X' in some calendars."},
+  {n:171,s:"Days of the Week",q:"How do you say 'last Tuesday' in Spanish?",opts:["el próximo martes","el martes pasado","todos los martes","cada martes"],a:"B",e:"'Pasado' means last/past: 'el martes pasado'."},
+  {n:172,s:"Days of the Week",q:"How do you say 'next Friday' in Spanish?",opts:["el viernes pasado","los viernes","el próximo viernes","cada viernes"],a:"C",e:"'Próximo' means next: 'el próximo viernes'."},
+  {n:173,s:"Days of the Week",q:"Which sentence means 'I work every Saturday'?",opts:["Trabajo el próximo sábado.","Trabajo todos los sábados.","Trabajo los sábados pasados.","Trabajo cada el sábado."],a:"B",e:"'Todos los sábados' = every Saturday."},
+  // Colors extended
+  {n:174,s:"Colors",q:"How do you say 'the red car' in Spanish? (El coche ___)",opts:["El coche roja","El coche rojos","El coche rojo","El coche rojas"],a:"C",e:"'Coche' is masculine singular → 'rojo'."},
+  {n:175,s:"Colors",q:"Which is correct? 'The yellow flowers' (Las flores ___)",opts:["amarillo","amarilla","amarillos","amarillas"],a:"D",e:"'Flores' is feminine plural → 'amarillas'."},
+  {n:176,s:"Colors",q:"How do you say 'a gray cat' in Spanish?",opts:["un gato gris","una gato gris","un gata gris","unos gatos grises"],a:"A",e:"'Gato' is masculine singular → 'un gato gris'. 'Gris' is invariable for gender."},
+  {n:177,s:"Colors",q:"Which color means 'light blue' in Spanish?",opts:["Azul oscuro","Azul claro","Azul marino","Azul eléctrico"],a:"B",e:"'Claro' = light, so 'azul claro' = light blue."},
+  {n:178,s:"Colors",q:"Complete: 'El cielo es ___ hoy.' (cloudy / gray)",opts:["negro","blanco","gris","marrón"],a:"C",e:"A cloudy sky looks gray → 'gris'."},
+  {n:179,s:"Colors",q:"How do you describe 'the green trees' in Spanish?",opts:["los árboles verde","los árboles verdes","las árboles verde","la árbol verde"],a:"B",e:"'Árboles' is masculine plural → 'los árboles verdes'."},
+  {n:180,s:"Colors",q:"What is 'morado oscuro' in English?",opts:["Light purple","Dark purple","Dark red","Dark blue"],a:"B",e:"'Oscuro' = dark, 'morado' = purple → dark purple."},
+  {n:181,s:"Colors",q:"Choose the correct sentence: 'She is wearing a white dress.'",opts:["Ella lleva un vestido blanca.","Ella lleva un vestido blanco.","Ella lleva una vestido blanco.","Ella llevas un vestido blanco."],a:"B",e:"'Vestido' is masculine → 'un vestido blanco'."},
+  {n:182,s:"Colors",q:"What color is associated with envy in the Spanish expression 'verde de envidia'?",opts:["Rojo","Amarillo","Verde","Azul"],a:"C",e:"'Verde de envidia' = green with envy."},
+  {n:183,s:"Colors",q:"How do you say 'the blue and white flag' in Spanish?",opts:["la bandera azul y blanca","la bandera azul y blanco","la bandera azules y blancas","el bandera azul y blanca"],a:"A",e:"'Bandera' is feminine → both adjectives are feminine: 'azul' (invariable) and 'blanca'."},
+];
+
+const SECTIONS = ["All","Articles","Pronouns","Prepositions","Verb Conjugation","Numbers","Days of the Week","Colors","Telling Time"];
+const LETTERS = ["A","B","C","D"];
+
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+let mode = "learn";
+let activeSection = "All";
+let testState = null; // {questions, current, answers, shuffledOpts, submitted}
+
+// ──────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────
+function getQuestions() {
+  if (activeSection === "All") return [...RAW];
+  return RAW.filter(q => q.s === activeSection);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ──────────────────────────────────────────────
+// RENDER SECTION BAR
+// ──────────────────────────────────────────────
+function renderSectionBar() {
+  const bar = document.getElementById("sectionBar");
+  bar.innerHTML = SECTIONS.map(s =>
+    `<button class="sec-pill ${s === activeSection ? "active" : ""}" onclick="setSection('${s}')">${s}</button>`
+  ).join("");
+}
+
+// ──────────────────────────────────────────────
+// LEARN MODE
+// ──────────────────────────────────────────────
+function renderLearn() {
+  const qs = getQuestions();
+  const main = document.getElementById("mainContent");
+  if (!qs.length) { main.innerHTML = `<div class="empty"><div class="empty-icon">📭</div>No questions found.</div>`; return; }
+
+  const progress = `<div class="progress-wrap">
+    <div class="progress-top"><span>${qs.length} questions</span><span>${activeSection}</span></div>
+  </div>`;
+
+  const cards = qs.map(q => {
+    const correctIdx = LETTERS.indexOf(q.a);
+    const opts = q.opts.map((opt, i) => `
+      <div class="option ${i === correctIdx ? "learn-correct" : ""}">
+        <span class="opt-letter">${LETTERS[i]}</span>
+        <span class="opt-text">${opt}</span>
+      </div>`).join("");
+    return `<div class="q-card">
+      <div class="q-meta">
+        <span class="q-num">Q${q.n}</span>
+        <span class="q-section">${q.s}</span>
+      </div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${opts}</div>
+      <div class="explanation"><strong>✅ Explanation:</strong> ${q.e}</div>
+    </div>`;
+  }).join("");
+
+  main.innerHTML = progress + cards;
+}
+
+// ──────────────────────────────────────────────
+// TEST MODE
+// ──────────────────────────────────────────────
+function initTest() {
+  const qs = shuffle(getQuestions());
+  testState = {
+    questions: qs,
+    current: 0,
+    answers: new Array(qs.length).fill(null),
+    shuffledOpts: qs.map(q => {
+      const indices = shuffle([0,1,2,3]);
+      return { indices, opts: indices.map(i => q.opts[i]) };
+    }),
+    submitted: false,
+    showScore: false
+  };
+}
+
+function renderTest() {
+  const main = document.getElementById("mainContent");
+  if (!testState) { initTest(); }
+  if (testState.showScore) { renderScore(); return; }
+
+  const {questions, current, answers, shuffledOpts} = testState;
+  const q = questions[current];
+  const so = shuffledOpts[current];
+  const total = questions.length;
+  const pct = ((current) / total * 100).toFixed(1);
+
+  const progress = `<div class="progress-wrap">
+    <div class="progress-top"><span>Question ${current+1} of ${total}</span><span>${activeSection}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+  </div>`;
+
+  const answered = answers[current];
+  const correctOrigIdx = LETTERS.indexOf(q.a);
+
+  const opts = so.opts.map((opt, si) => {
+    const origIdx = so.indices[si];
+    let cls = "";
+    if (answered !== null) {
+      if (origIdx === correctOrigIdx) cls = "correct";
+      else if (si === answered) cls = "wrong";
+    }
+    return `<div class="option ${cls}" ${answered === null ? `onclick="selectOpt(${si})"` : ""}>
+      <span class="opt-letter">${LETTERS[si]}</span>
+      <span class="opt-text">${opt}</span>
+    </div>`;
+  }).join("");
+
+  const explanation = answered !== null
+    ? `<div class="explanation"><strong>✅ Explanation:</strong> ${q.e}</div>` : "";
+
+  const navButtons = `<div class="q-nav">
+    <button class="btn btn-secondary" onclick="navQ(-1)" ${current===0?"disabled":""}>← Prev</button>
+    <button class="btn btn-secondary" onclick="navQ(1)" ${current===total-1?"disabled":""}>Next →</button>
+    ${current===total-1 ? `<button class="btn btn-primary" onclick="showScore()">See Results 🎉</button>` : ""}
+  </div>`;
+
+  main.innerHTML = progress + `<div class="q-card">
+    <div class="q-meta">
+      <span class="q-num">Q${q.n}</span>
+      <span class="q-section">${q.s}</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">${opts}</div>
+    ${explanation}
+    ${navButtons}
+  </div>`;
+}
+
+function selectOpt(si) {
+  if (testState.answers[testState.current] !== null) return;
+  testState.answers[testState.current] = si;
+  renderTest();
+}
+
+function navQ(dir) {
+  testState.current = Math.max(0, Math.min(testState.questions.length - 1, testState.current + dir));
+  renderTest();
+}
+
+function showScore() {
+  testState.showScore = true;
+  renderScore();
+}
+
+function renderScore() {
+  const {questions, answers, shuffledOpts} = testState;
+  let correct = 0;
+  questions.forEach((q, i) => {
+    const correctOrigIdx = LETTERS.indexOf(q.a);
+    if (answers[i] !== null && shuffledOpts[i].indices[answers[i]] === correctOrigIdx) correct++;
+  });
+  const total = questions.length;
+  const wrong = answers.filter(a => a !== null).length - correct;
+  const skipped = answers.filter(a => a === null).length;
+  const pct = Math.round(correct / total * 100);
+
+  document.getElementById("mainContent").innerHTML = `
+    <div class="score-panel">
+      <div class="score-big">${pct}%</div>
+      <div class="score-label">Your Score — ${correct} of ${total} correct</div>
+      <div class="score-breakdown">
+        <div class="sb-item"><div class="sb-num correct">${correct}</div><div class="sb-desc">Correct</div></div>
+        <div class="sb-item"><div class="sb-num wrong">${wrong}</div><div class="sb-desc">Wrong</div></div>
+        <div class="sb-item"><div class="sb-num" style="color:var(--muted)">${skipped}</div><div class="sb-desc">Skipped</div></div>
+      </div>
+      <button class="btn btn-primary" style="margin-right:12px" onclick="retryTest()">🔄 Retry Test</button>
+      <button class="btn btn-secondary" onclick="reviewTest()">📋 Review Answers</button>
+    </div>`;
+}
+
+function retryTest() {
+  initTest();
+  renderTest();
+}
+
+function reviewTest() {
+  testState.showScore = false;
+  testState.current = 0;
+  renderTest();
+}
+
+// ──────────────────────────────────────────────
+// CONTROLLERS
+// ──────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll(".mode-tab").forEach((t,i) => t.classList.toggle("active", ["learn","test"][i] === m));
+  if (m === "test") { testState = null; initTest(); renderTest(); }
+  else renderLearn();
+}
+
+function setSection(s) {
+  activeSection = s;
+  renderSectionBar();
+  if (mode === "test") { testState = null; initTest(); renderTest(); }
+  else renderLearn();
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+renderSectionBar();
+renderLearn();
+</script>
+</body>
+</html>
